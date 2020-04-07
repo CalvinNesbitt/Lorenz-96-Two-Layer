@@ -304,7 +304,7 @@ class Ginelli96(object):
 
     @property
     def run_data(self):
-        delT = self.tau # How oftern we save
+        delT = self.tau # How often we save
         dic = {}
         dic['X'] = xr.DataArray(self._history_X, dims=['time', 'x'], name='X',
                                 coords = {'time': np.arange(len(self._history_X)) * delT,'x': np.arange(self.K)})
