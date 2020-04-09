@@ -6,8 +6,7 @@ import xarray as xr
 import sys
 
 """
-Ginelli algorithm applied to the two layer L96 system.
-
+OLD IMPLEMENTATION - SOON TO BE DELETED 
 Created on 2019-04-16-12-28
 Author: Stephan Rasp, raspstephan@gmail.com
 
