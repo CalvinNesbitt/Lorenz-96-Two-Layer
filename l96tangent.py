@@ -4,7 +4,11 @@ Contents
 ----------
 - Integrator, class for integrating L96 two layer and corresponding tangent dynamics simultaneously.
 
-- TrajectoryObserver, class for observing the trajectory of the L96 tangent integration."""
+- TrajectoryObserver, class for observing the trajectory of the L96 tangent integration.
+
+- make_observations, functions that makes many observations L96 tangent integration."""
+
+
 
 import numpy as np
 import xarray as xr
@@ -14,7 +18,7 @@ class Integrator:
 
     """Integrates the L96 ODEs and it's tangent dynamics simultaneously."""
     def __init__(self, K=36, J=10, h=1, Ff=6, Fs=10, c=10, dt=0.001,
-                 X_init=None, Y_init=None, dx_init=None, dy_init=None, noprog=True):
+                 X_init=None, Y_init=None, dx_init=None, dy_init=None):
 
         # Model parameters
         self.K, self.J, self.h, self.Ff, self.Fs, self.c, self.dt = K, J, h, Ff, Fs, c, dt
@@ -23,9 +27,6 @@ class Integrator:
 
         # Step counts
         self.step_count = 0 # Number of integration steps
-
-        # Progress Bars
-        self.noprog = noprog
 
         # Non-linear Variables
         self.X = np.random.rand(self.K) if X_init is None else X_init.copy() # Random IC if none given
@@ -93,10 +94,10 @@ class Integrator:
         self.dy += 1 / 6 * (k1_dy + 2 * k2_dy + 2 * k3_dy + k4_dy)
         self.step_count += 1
 
-    def integrate(self, time):
+    def integrate(self, time, noprog=True):
         """time: how long we integrate for in adimensional time."""
         steps = int(time / self.dt)
-        for n in tqdm(range(steps), disable = self.noprog):
+        for n in tqdm(range(steps), disable=noprog):
             self._step()
 
     def set_state(self, x, tangent_x):
@@ -209,3 +210,13 @@ class TrajectoryObserver():
         self.observations.to_netcdf(cupboard)
         print(f'Observations written to {cupboard}. Erasing personal log.\n')
         self.wipe()
+        
+def make_observations(runner, looker, obs_num, obs_freq, noprog=False):
+    """Makes observations given runner and looker.
+    runner, integrator object.
+    looker, observer object.
+    obs_num, how many observations you want.
+    obs_freq, adimensional time between observations"""
+    for step in tqdm(np.repeat(obs_freq, obs_num), disable=noprog):
+        runner.integrate(obs_freq)
+        looker.look(runner)

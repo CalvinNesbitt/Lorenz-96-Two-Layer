@@ -4,10 +4,19 @@ Contents
 ----------
 - posQR, function that performs QR decomposition with postivie entries on the R diagonal
 
-- Forward, class for performing the forward integration steps of the Ginelli algorithm"""
+- Forward, class for performing the forward integration steps of the Ginelli algorithm
+
+- make_observations, function that uses looker and runner to make many observations.
+
+- make_cupboard, function that makes directories to save observations in."""
 
 import numpy as np
 import xarray as xr
+from tqdm.notebook import tqdm
+import os
+
+""" Classes that do most of the work
+--------------------------------------------------"""
 
 def posQR(M):
     """ Returns QR decomposition of a matrix with positive diagonals on R.
@@ -86,7 +95,32 @@ class Forward:
             self.oldQ, self.R = posQR(self.P)
             self.step_count += 1
             
-    def run(self, steps):
+    def run(self, steps, noprog=True):
         """Performs specified number of Ginelli Steps"""
-        for i in range(steps):
+        for i in tqdm(range(steps), disable=noprog):
             self._step()
+            
+            
+""" Utilities
+--------------------------------------------------"""
+            
+def make_observations(runner, lookers, obs_num, obs_freq, noprog=True):
+    """Uses looker and runner to make many observations of Ginelli algorithm.
+    runner, ginelli Forward object.
+    looker, ginelli observer object
+    obs_num, how many observations you want.
+    obs_freq, ginelli steps between observations"""
+    for step in tqdm(np.repeat(obs_freq, obs_num), disable=noprog):
+        runner.run(obs_freq)
+        for looker in lookers:
+            looker.look(runner)
+
+def make_cupboard():
+    """Makes directories to save observations in"""
+    
+    for dirName in ['ginelli', 'ginelli/step2', 'ginelli/step2/R', 'ginelli/step2/BLV',
+                    'ginelli/step3', 'ginelli/step4', 'ginelli/step5']:
+        if not os.path.exists(dirName):
+            os.mkdir(dirName)
+            print(f'Made directory {dirName}.\n')
+        else: print(f'The directory {dirName} already exists.\n')
