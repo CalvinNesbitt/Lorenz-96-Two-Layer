@@ -7,10 +7,10 @@
 # ---------------------------------------------------------------
 
 # Where output of experiment will be saved. CARE IF USING ARRAY JOBS
-experiment_name=clean-test
+experiment_name=TEST
+
 notebook_directory=/rds/general/user/cfn18/home/Lyapunov-Analysis/Lorenz-96-Two-Layer
 output=$notebook_directory/$experiment_name
-mkdir $output
 
 # Running Ginelli algorithm
 module load anaconda3/personal
@@ -23,6 +23,7 @@ cd $PBS_O_WORKDIR
 source deactivate
 
 # Copying Data We want over to notebook area
+mkdir $output
 mv ginelli/step5 ginelli/timings.p $output
 
 # Clean up

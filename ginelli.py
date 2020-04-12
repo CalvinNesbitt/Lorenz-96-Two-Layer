@@ -35,7 +35,7 @@ kb = 5 # Number of observations
 kc = 3 # CLV convergence
 
 # Integrator
-runner = l96t.Integrator()
+runner = l96t.Integrator(K=2, J=2)
 ginelli_runner = utilities.Forward(runner, tau)
 
 # Observables

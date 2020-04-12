@@ -17,18 +17,7 @@ integration.
 import numpy as np
 import xarray as xr
 import sys
-
-def in_notebook():
-    """
-    Returns ``True`` if the module is running in IPython kernel,
-    ``False`` if in IPython shell or other Python shell.
-    """
-    return 'ipykernel' in sys.modules
-
-if in_notebook():
-    import tqdm.notebook as tqdm
-else:
-    from tqdm import tqdm
+from tqdm import tqdm
 
 # ------------------------------------------
 # Integrator
