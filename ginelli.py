@@ -14,6 +14,7 @@ import pickle
 import time as tm
 import xarray as xr
 import os
+import sys
 
 # Lorenz 96 integrator
 import l96tangent as l96t
@@ -25,17 +26,22 @@ from ginelli_observers import *
 # -----------------------------------------
 # Setup & Parameter Choices
 # -----------------------------------------
-dump_size = 2 # How many observations before output
+
+# timings
+values = np.linspace(1/16, 1, 5)
+value = values[int(sys.argv[1]) - 1]
+
+dump_size = 250 # How many observations before output
 
 # Time Parameter Choices
-tau = 0.1 # tau & transient feed in to the integrator
+tau = 0.01 # tau & transient feed in to the integrator
 transient = 1.0
-ka = 3 # BLV convergence
-kb = 5 # Number of observations
-kc = 3 # CLV convergence
+ka = 2000 # BLV convergence
+kb = 10000 # Number of observations
+kc = 2000 # CLV convergence
 
 # Integrator
-runner = l96t.Integrator(K=2, J=2)
+runner = l96t.Integrator(h=value)
 ginelli_runner = utilities.Forward(runner, tau)
 
 # Observables
@@ -149,8 +155,8 @@ BLV_files.sort(reverse=True)
 
 # Setting up observable storage
 
-parameters = ginelli_runner.parameter_dict.copy().update(
-{'transient':transient,'ka':ka, 'kb':kb, 'kc':kc})
+parameters = ginelli_runner.parameter_dict.copy()
+parameters.update({'transient':transient,'ka':ka, 'kb':kb, 'kc':kc})
 LyapunovLooker = LyapunovObserver(parameters, utilities.max_digit(BLV_files))
 
 for [rfile, bfile] in zip(R_files, BLV_files): # Loop over files that were dumped

@@ -55,7 +55,6 @@ class Forward:
         self.P = np.random.rand(self.size, self.size) # Stretched Matrix
 
         # Initialising orthogonal matrix
-
         if (oldQ == None):
             eps = 0.0001
             self.oldQ = eps * np.identity(self.size)
