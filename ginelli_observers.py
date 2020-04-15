@@ -9,16 +9,23 @@ Contents
 
 - LyapunovObserver, class for observing FTBLEs, FTCLEs, CLVs, BLVS."""
 
+# ----------------------------------------
+# Imports
+# ----------------------------------------
 import numpy as np
 import xarray as xr
-from tqdm.notebook import tqdm
+from tqdm import tqdm
+
+# ----------------------------------------
+# RMatrixObserver
+# ----------------------------------------
 
 class RMatrixObserver:
     """Observes the R Matrix in the forward Ginelli Steps."""
 
     def __init__(self, ginelli):
         """param, ginelli: Ginelli Forward Stepper being obseved."""
-        
+
         # Knowledge associated with this observer
         self.name = 'R' # will be used in file save
         self.ginelli = ginelli # stepper we're associated with
@@ -37,7 +44,7 @@ class RMatrixObserver:
 
         # Making Observations
         self.R_obs.append(ginelli.R.copy())
-    
+
     @property
     def observations(self):
         """cupboard: Directory where to write netcdf."""
@@ -56,36 +63,40 @@ class RMatrixObserver:
         """Erases observations"""
         self.time_obs = []
         self.R_obs = []
-    
+
     def dump(self, cupboard, name=None):
         """ Saves observations to netcdf and wipes.
         cupboard: Directory where to write netcdf.
         name: file name"""
-        
+
         if (len(self.R_obs) == 0):
             print('I have no observations! :(')
             return
-        
+
         if name == None:
             name=self.name
-        
+
         save = cupboard + f'/{name}' + f'{self.dump_count + 1}.nc'
         self.observations.to_netcdf(save)
         print(f'Observations written to {save}. Erasing personal log.\n')
         self.wipe()
-        self.dump_count +=1 
-        
+        self.dump_count +=1
+
+# ----------------------------------------
+# BLVMatrixObserver
+# ----------------------------------------
+
 class BLVMatrixObserver:
     """Observes the Q Matrix in the forward Ginelli Steps."""
 
     def __init__(self, ginelli):
         """param, ginelli: Ginelli Forward Stepper being obseved."""
-        
+
         # Knowledge from Ginelli object
         self.ginelli = ginelli # stepper we're associated with
         self.parameters = ginelli.parameter_dict
         self.le_index = np.arange(1, 1 + ginelli.size)
-        
+
         # Info
         self.name = 'BLV' # will be used in file save
         self.dump_count = 0
@@ -102,7 +113,7 @@ class BLVMatrixObserver:
 
         # Making Observations
         self.BLV_obs.append(ginelli.oldQ.copy())
-    
+
     @property
     def observations(self):
         """cupboard: Directory where to write netcdf."""
@@ -121,36 +132,40 @@ class BLVMatrixObserver:
         """Erases observations"""
         self.time_obs = []
         self.BLV_obs = []
-    
+
     def dump(self, cupboard, name=None):
         """ Saves observations to netcdf and wipes.
         cupboard: Directory where to write netcdf.
         name: file name"""
-        
+
         if (len(self.BLV_obs) == 0):
             print('I have no observations! :(')
             return
-        
+
         if name == None:
             name=self.name
-        
+
         save = cupboard + f'/{name}' + f'{self.dump_count + 1}.nc'
         self.observations.to_netcdf(save)
         print(f'Observations written to {save}. Erasing personal log.\n')
         self.wipe()
-        self.dump_count +=1 
-        
+        self.dump_count +=1
+
+# ----------------------------------------
+# LyapunovObserver
+# ----------------------------------------
+
 class LyapunovObserver:
     """Observes CLVs, BLVs, FTCLEs and FTBLEs. Designed to be used in final step of Ginelli algorithm."""
 
     def __init__(self, metadata, number_files):
         """param, metadata: Information we want associated with this data file.
         param, numer_files: Number of files observations are dumped into"""
-        
-        # Knowledge 
+
+        # Knowledge
         self.parameters = metadata
         self.name = 'LyapObs'
-        self.dump_count = number_files 
+        self.dump_count = number_files
 
         # Observation log
         self.time_obs = []
@@ -170,7 +185,7 @@ class LyapunovObserver:
         self.BLV_obs.append(BLV)
         self.ftcle_obs.append(ftcle)
         self.ftble_obs.append(ftble)
-    
+
     @property
     def observations(self):
         """cupboard: Directory where to write netcdf."""
@@ -189,7 +204,7 @@ class LyapunovObserver:
                                 coords = {'time': _time, 'le_index': _le_index})
         dic['BLV'] = xr.DataArray(self.BLV_obs, dims=['time', 'row', 'le_index'], name='BLV',
                                 coords = {'time': _time, 'le_index': _le_index})
-        
+
         ds = xr.Dataset(dic, attrs=self.parameters)
         return ds.reindex(time = ds.time[::-1]) # Return reversed array as we observe backwards
 
@@ -200,20 +215,20 @@ class LyapunovObserver:
         self.BLV_obs = []
         self.ftcle_obs = []
         self.ftble_obs = []
-    
+
     def dump(self, cupboard, name=None):
         """ Saves observations to netcdf and wipes.
         cupboard: Directory where to write netcdf.
         name: file name"""
-        
+
         if (len(self.BLV_obs) == 0):
             print('I have no observations! :(')
             return
-        
+
         if name == None:
             name=self.name
-        
-        save = cupboard + f'/{name}' + f'{self.dump_count}.nc' 
+
+        save = cupboard + f'/{name}' + f'{self.dump_count}.nc'
         self.observations.to_netcdf(save)
         print(f'Observations written to {save}. Erasing personal log.\n')
         self.wipe()

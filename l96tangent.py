@@ -2,17 +2,26 @@
 ----------
 Contents
 ----------
-- Integrator, class for integrating L96 two layer and corresponding tangent dynamics simultaneously.
+- Integrator, class for integrating L96 two layer and corresponding tangent
+dynamics simultaneously.
 
-- TrajectoryObserver, class for observing the trajectory of the L96 tangent integration.
+- TrajectoryObserver, class for observing the trajectory of the L96
+tangent integration.
 
-- make_observations, functions that makes many observations L96 tangent integration."""
-
-
-
+- make_observations, function that makes many observations L96 tangent
+integration.
+"""
+# ----------------------------------------
+# Imports
+# ----------------------------------------
 import numpy as np
 import xarray as xr
-from tqdm.notebook import tqdm
+import sys
+from tqdm import tqdm
+
+# ------------------------------------------
+# Integrator
+# ------------------------------------------
 
 class Integrator:
 
@@ -111,12 +120,12 @@ class Integrator:
     def state(self):
         """Where we are in phase space"""
         return np.concatenate([self.X, self.Y])
-                              
+
     @property
     def tangent_state(self):
         """Where we are in tangent space"""
         return np.concatenate([self.dx, self.dy])
-    
+
     @property
     def time(self):
         """a-dimensional time"""
@@ -140,6 +149,10 @@ class Integrator:
     def reset_count(self):
         """Reset Step count"""
         self.step_count = 0
+
+# ------------------------------------------
+# TrajectoryObserver
+# ------------------------------------------
 
 class TrajectoryObserver():
     """Observes the trajectory of L96 ODE integrator. Dumps to netcdf."""
@@ -210,7 +223,7 @@ class TrajectoryObserver():
         self.observations.to_netcdf(cupboard)
         print(f'Observations written to {cupboard}. Erasing personal log.\n')
         self.wipe()
-        
+
 def make_observations(runner, looker, obs_num, obs_freq, noprog=False):
     """Makes observations given runner and looker.
     runner, integrator object.
