@@ -28,20 +28,20 @@ from ginelli_observers import *
 # -----------------------------------------
 
 # timings
-values = [250, 500, 1000, 2000, 4000]
+values = np.linspace(1/16, 1, 5)
 value = values[int(sys.argv[1]) - 1]
 
-dump_size = 250 # How many observations before output
+dump_size = 500 # How many observations before output
 
 # Time Parameter Choices
 tau = 0.01 # tau & transient feed in to the integrator
 transient = 1.0
-ka = 250 # BLV convergence
-kb = 250 # Number of observations
-kc = value # CLV convergence
+ka = 5000 # BLV convergence
+kb = 15000 # Number of observations
+kc = 5000 # CLV convergence
 
 # Integrator
-runner = l96t.Integrator()
+runner = l96t.Integrator(h=value, Ff=0)
 ginelli_runner = utilities.Forward(runner, tau)
 
 # Observables
