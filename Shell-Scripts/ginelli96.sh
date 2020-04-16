@@ -1,6 +1,6 @@
-#PBS -l walltime=72:00:00
-#PBS -l select=1:ncpus=8:mem=90gb
-#PBS -N h-moon-noFF
+#PBS -l walltime=48:00:00
+#PBS -l select=1:ncpus=8:mem=30gb
+#PBS -N fast-kc
 #PBS -J 1-5
 
 # ---------------------------------------------------------------
@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------
 
 job_type='array' # 'single' or 'array'. Add 'PBS -J 1-N' for jobs
-experiment_name=coupling-no-Ff
+experiment_name=kc-faster
 
 module load anaconda3/personal
 source activate personalpy3

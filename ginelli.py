@@ -28,17 +28,17 @@ from ginelli_observers import *
 # -----------------------------------------
 
 # timings
-values = np.linspace(1/16, 1, 5)
+values = [250, 500, 1000, 2000, 4000]
 value = values[int(sys.argv[1]) - 1]
 
-dump_size = 500 # How many observations before output
+dump_size = 250 # How many observations before output
 
 # Time Parameter Choices
 tau = 0.01 # tau & transient feed in to the integrator
 transient = 1.0
-ka = 1000 # BLV convergence
-kb = 10000 # Number of observations
-kc = 4000 # CLV convergence
+ka = 250 # BLV convergence
+kb = 250 # Number of observations
+kc = value # CLV convergence
 
 # Integrator
 runner = l96t.Integrator()
@@ -180,7 +180,8 @@ for [rfile, bfile] in zip(R_files, BLV_files): # Loop over files that were dumpe
         ftble = np.log(np.diag(R))/(tau)
 
         # Making observation
-        LyapunovLooker.look(R.time, CLV, BLV, ftcle, ftble)
+        time = R.time
+        LyapunovLooker.look(R.time, CLV, BLV.values, ftcle, ftble) #BLV.values important as np faster
 
 
     LyapunovLooker.dump('ginelli/step5')
