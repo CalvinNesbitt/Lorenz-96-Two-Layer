@@ -23,7 +23,7 @@ import sys
 import numpy as np
 import xarray as xr
 import os
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 # --------------------------------------------------
 # Classes that do most of the work

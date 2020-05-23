@@ -14,6 +14,7 @@
 # - density plot, NEEDS FINISHIN
 #---------------------------------------------------------------
 
+import matplotlib.pyplot as plt
 
 #---------------------------------------------------------------
 # Processing Utilities
@@ -22,11 +23,23 @@
 #---------------------------------------------------------------
 # Minimum positive LE
 #---------------------------------------------------------------
+def spectra(data, geometry='C'):
+    """Returns mean Lyapunov exponents.
+    """
+    if (geometry == 'C'):
+        spectra = data.ftcle.mean(dim='time', skipna=True)
+    else: # then FTBLE
+        spectra = data.ftble.mean(dim='time', skipna=True)
+    return spectra
+#---------------------------------------------------------------
+# Minimum positive LE
+#---------------------------------------------------------------
 def min_pos(LE):
-    """Finds the minimum positive LE index.
+    """Finds the minimum non-negative LE index. (So neutral manifold bunched with
+    positive).
     LE, xarray of Lyapunov spectra.
     """
-    return LE.where(LE > 0).le_index.max().item()
+    return LE.where(LE>=0).dropna(dim='le_index').le_index.max().item()
 
 #---------------------------------------------------------------
 # Longer FTLE average
@@ -34,11 +47,11 @@ def min_pos(LE):
 
 def LE_average(data, L, save='None'):
     """Returns xarray with FTLEs being averaged over long times. DESIGNED FOR PROCESSED DATA"""
-    FTBLE = data.FTBLE.rolling(time = L).mean()[L - 1::L]
-    FTCLE = data.FTCLE.rolling(time = L).mean()[L - 1::L]
-    avg_data = data.sel(time = FTBLE.time) # Picking out data and average time steps.
-    avg_data.FTBLE.values = FTBLE.values # Updating LEs
-    avg_data.FTCLE.values = FTCLE.values # Updating LEs
+    ftble = data.ftble.rolling(time = L).mean()[L - 1::L]
+    ftcle = data.ftcle.rolling(time = L).mean()[L - 1::L]
+    avg_data = data.sel(time = ftble.time) # Picking out data and average time steps.
+    avg_data.ftble.values = ftble.values # Updating LEs
+    avg_data.ftcle.values = ftcle.values # Updating LEs
 
     # Adding Attributes
     avg_data.attrs.update({'L' : L})

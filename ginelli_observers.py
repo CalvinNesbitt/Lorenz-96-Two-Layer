@@ -14,7 +14,7 @@ Contents
 # ----------------------------------------
 import numpy as np
 import xarray as xr
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 # ----------------------------------------
 # RMatrixObserver
@@ -116,7 +116,6 @@ class BLVMatrixObserver:
 
     @property
     def observations(self):
-        """cupboard: Directory where to write netcdf."""
         if (len(self.BLV_obs) == 0):
             print('I have no observations! :(')
             return
@@ -188,7 +187,6 @@ class LyapunovObserver:
 
     @property
     def observations(self):
-        """cupboard: Directory where to write netcdf."""
         if (len(self.CLV_obs) == 0):
             print('I have no observations! :(')
             return
