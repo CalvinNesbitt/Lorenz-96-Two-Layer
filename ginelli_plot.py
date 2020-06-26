@@ -85,17 +85,17 @@ def spectra_parameter(data_list, parameter_key, geometry='C', save = 'None'):
        
         if (geometry == 'C'):
             spectra = data.ftcle.mean(dim='time', skipna=True)
-            label = f'{parameter_key}$={attr:.2f}$'
+            label = f'${attr:.2f}$'
         else: # then FTBLE
             spectra = data.ftble.mean(dim='time', skipna=True)
-            label = f'{parameter_key}$={attr:.2f}$'
-
+            label = f'${attr:.2f}$'
 
         plt.plot(spectra, label=label)
 
-    plt.legend()
+    plt.legend(title = f'{parameter_key}')
     plt.title(f'FT{geometry}LE Means')
     plt.xlabel('LE Index') 
+    plt.grid()
     
     if (save == 'None'):
         plt.show()

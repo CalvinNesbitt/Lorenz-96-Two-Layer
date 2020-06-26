@@ -50,7 +50,7 @@ class Integrator:
 
         dXdt = (
                 np.roll(X, 1) * (np.roll(X, -1) - np.roll(X, 2)) -
-                X + self.Fs - self.h * Y.reshape(self.K, self.J).mean(1) # Using Y mean
+                X + self.Fs - self.h * Y.reshape(self.K, self.J).mean(1) # Using Y mean
         )
         return self.dt * dXdt
 
@@ -181,7 +181,7 @@ class TrajectoryObserver():
 
         # Making Observations
         self.x_obs.append(integrator.X.copy())
-        self.y_obs.append(integrator.Y.copy()/self.scale)
+        self.y_obs.append(integrator.Y.copy()/self.scale) # Integrator solves transformed equations
         self.dx_obs.append(integrator.dx.copy())
         self.dy_obs.append(integrator.dy.copy()/self.scale)
 
