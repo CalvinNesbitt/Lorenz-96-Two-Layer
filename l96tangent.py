@@ -39,7 +39,7 @@ class Integrator:
 
         # Non-linear Variables
         self.X = np.random.rand(self.K) if X_init is None else X_init.copy() # Random IC if none given
-        self.Y = np.zeros(self.K * self.J) if Y_init is None else Y_init.copy() * self.b # ALL the y's
+        self.Y = np.random.rand(self.K * self.J) if Y_init is None else Y_init.copy() * self.b # ALL the y's
 
         # TLE Variables
         self.dx = np.array([i/10000 for i in np.random.rand(self.K)]) if dx_init is None else dx_init.copy()
