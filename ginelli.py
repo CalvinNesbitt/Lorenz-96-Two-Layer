@@ -17,7 +17,7 @@ import os
 import sys
 
 # Lorenz 96 integrator
-import l96tangent as l96t
+import l96adaptive as l96
 
 # Dependencies
 import ginelli_utilities as utilities
@@ -27,26 +27,33 @@ from ginelli_observers import *
 # Setup & Parameter Choices
 # -----------------------------------------
 
-# timings
+# h experiment values
 values = np.linspace(1/16, 1, 5)
-value = values[int(sys.argv[1]) - 1]
+h = values[int(sys.argv[1]) - 1]
 
 dump_size = 500 # How many observations before output
 
 # Time Parameter Choices
-tau = 0.01 # tau & transient feed in to the integrator
-transient = 1.0
-ka = 5000 # BLV convergence
-kb = 15000 # Number of observations
-kc = 5000 # CLV convergence
+tau = 0.1 # time between QR decompositions
+transient = 50
+ka = 500 # BLV convergence
+kb = 1000 # Number of observations
+kc = 500 # CLV convergence
 
 # Integrator
-runner = l96t.Integrator(h=value, Ff=0)
-ginelli_runner = utilities.Forward(runner, tau)
+runner = l96.Integrator() #
+tangent_runner = l96.TangentIntegrator()
+ginelli_runner = utilities.Forward(tangent_runner, tau)
 
 # Observables
 Rlooker = RMatrixObserver(ginelli_runner)
 BLVlooker = BLVMatrixObserver(ginelli_runner)
+TrajectoryLooker = TrajectoryObserver(ginelli_runner)
+
+# Observables
+Rlooker = RMatrixObserver(ginelli_runner)
+BLVlooker = BLVMatrixObserver(ginelli_runner)
+TrajectoryLooker = TrajectoryObserver(ginelli_runner)
 
 # Timing the algorithm
 timings = {}
@@ -64,7 +71,8 @@ utilities.make_cupboard()
 # -----------------------------------------
 
 print('\nTransient beginning.\n')
-runner.integrate(transient)
+runner.integrate(transient) # runner does the transient integration, then we update tangent_runner state
+tangent_runner.set_state(runner.state, tangent_runner.tangent_state)
 print('\nTransient finished. Beginning BLV convergence steps.\n')
 
 timings.update({'transient': tm.time() - start})
@@ -84,16 +92,18 @@ print('\nBLV convergence finished. Beginning to observe BLVs.\n')
 blocks = int(kb/dump_size) # How many times we dump
 remainder = kb%dump_size # Rest of observations
 
-for i in range(blocks):
+for i in tqdm(range(blocks)):
 
-    utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker], dump_size, 1)
+    utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], dump_size, 1)
     # Observation frequency has to be 1 if we're reversing CLVs
     Rlooker.dump('ginelli/step2/R')
     BLVlooker.dump('ginelli/step2/BLV')
+    TrajectoryLooker.dump('ginelli/trajectory')
 
 utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker], remainder, 1)
 Rlooker.dump('ginelli/step2/R')
 BLVlooker.dump('ginelli/step2/BLV')
+TrajectoryLooker.dump('ginelli/trajectory')
 
 timings.update({'Step2': tm.time() - timings['Step1'] - start})
 pickle.dump(timings, open("ginelli/timings.p", "wb" ))
@@ -113,6 +123,7 @@ for i in range(blocks):
 
 utilities.make_observations(ginelli_runner, [Rlooker], remainder, 1)
 Rlooker.dump('ginelli/step3')
+
 print('\nForward part all done :)')
 
 timings.update({'Step3': tm.time() - timings['Step2'] - start})
@@ -180,8 +191,8 @@ for [rfile, bfile] in zip(R_files, BLV_files): # Loop over files that were dumpe
         ftble = np.log(np.diag(R))/(tau)
 
         # Making observation
-        time = R.time
-        LyapunovLooker.look(R.time, CLV, BLV.values, ftcle, ftble) #BLV.values important as np faster
+        time = R.time.item()
+        LyapunovLooker.look(time, CLV, BLV.values, ftcle, ftble)
 
 
     LyapunovLooker.dump('ginelli/step5')

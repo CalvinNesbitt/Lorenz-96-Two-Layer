@@ -55,6 +55,7 @@ class Forward:
         self.P = np.random.rand(self.size, self.size) # Stretched Matrix
 
         # Initialising orthogonal matrix
+
         if (oldQ == None):
             eps = 0.0001
             self.oldQ = eps * np.identity(self.size)
@@ -139,7 +140,7 @@ def make_observations(runner, lookers, obs_num, obs_freq, noprog=True):
 def make_cupboard():
     """Makes directories to save observations in"""
 
-    for dirName in ['ginelli', 'ginelli/step2', 'ginelli/step2/R', 'ginelli/step2/BLV',
+    for dirName in ['ginelli', 'ginelli/trajectory', 'ginelli/step2', 'ginelli/step2/R', 'ginelli/step2/BLV',
                     'ginelli/step3', 'ginelli/step4', 'ginelli/step5']:
         if not os.path.exists(dirName):
             os.mkdir(dirName)

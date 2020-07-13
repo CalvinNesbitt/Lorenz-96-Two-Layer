@@ -17,7 +17,7 @@ integration.
 import numpy as np
 import xarray as xr
 import sys
-from tqdm import tqdm
+from tqdm import tqdm 
 
 # ------------------------------------------
 # Integrator
@@ -42,15 +42,15 @@ class Integrator:
         self.Y = np.zeros(self.K * self.J) if Y_init is None else Y_init.copy() * self.b # ALL the y's
 
         # TLE Variables
-        self.dx = np.random.rand(self.K) if dx_init is None else dx_init.copy()
-        self.dy = np.random.rand(self.K * self.J) if dy_init is None else dy_init.copy()
+        self.dx = np.array([i/10000 for i in np.random.rand(self.K)]) if dx_init is None else dx_init.copy()
+        self.dy = np.array([i/10000 for i in np.random.rand(self.K * self.J)]) if dy_init is None else dy_init.copy()
 
     def _rhs_X_dt(self, X, Y):
         """Compute the right hand side of the X-ODE. Note this has been scaled."""
 
         dXdt = (
                 np.roll(X, 1) * (np.roll(X, -1) - np.roll(X, 2)) -
-                X + self.Fs - self.h * Y.reshape(self.K, self.J).mean(1) # Using Y mean
+                X + self.Fs - self.h * Y.reshape(self.K, self.J).mean(1) # Using Y mean
         )
         return self.dt * dXdt
 
@@ -112,19 +112,19 @@ class Integrator:
     def set_state(self, x, tangent_x):
         """x is [X, Y]. tangent_x is [dx, dy]"""
         self.X = x[:self.K]
-        self.Y = x[self.K:]
+        self.Y = x[self.K:] * self.b
         self.dx = tangent_x[: self.K]
-        self.dy = tangent_x[self.K: ]
+        self.dy = tangent_x[self.K: ] * self.b
 
     @property
     def state(self):
-        """Where we are in phase space"""
-        return np.concatenate([self.X, self.Y])
+        """Where we are in phase space. RETURNS RESCALED Y"""
+        return np.concatenate([self.X, self.Y/self.b])
 
     @property
     def tangent_state(self):
         """Where we are in tangent space"""
-        return np.concatenate([self.dx, self.dy])
+        return np.concatenate([self.dx, self.dy/self.b])
 
     @property
     def time(self):
@@ -160,10 +160,11 @@ class TrajectoryObserver():
     def __init__(self, integrator, name='L96 Trajectory'):
         """param, integrator: integrator being observed."""
 
-        # Need knowledge of the integrator
+        # Needed knowledge of the integrator
         self._K = integrator.K
         self._J = integrator.J
         self._parameters = integrator.parameter_dict
+        self.scale = integrator.b
 
         # Trajectory Observation logs
         self.time_obs = [] # Times we've made observations
@@ -180,9 +181,9 @@ class TrajectoryObserver():
 
         # Making Observations
         self.x_obs.append(integrator.X.copy())
-        self.y_obs.append(integrator.Y.copy())
+        self.y_obs.append(integrator.Y.copy()/self.scale) # Integrator solves transformed equations
         self.dx_obs.append(integrator.dx.copy())
-        self.dy_obs.append(integrator.dy.copy())
+        self.dy_obs.append(integrator.dy.copy()/self.scale)
 
     @property
     def observations(self):
@@ -193,19 +194,19 @@ class TrajectoryObserver():
 
         dic = {}
         _time = self.time_obs
-        dic['X'] = xr.DataArray(self.x_obs, dims=['time', 'x'], name='X',
-                                coords = {'time': _time,'x': np.arange(self._K)})
-        dic['Y'] = xr.DataArray(self.y_obs, dims=['time', 'y'], name='Y',
-                                coords = {'time': _time, 'y': np.arange(self._K * self._J)})
-        dic['dx'] = xr.DataArray(self.x_obs, dims=['time', 'x'], name='dx',
-                                coords = {'time': _time,'x': np.arange(self._K)})
-        dic['dy'] = xr.DataArray(self.y_obs, dims=['time', 'y'], name='dy',
-                                coords = {'time': _time, 'y': np.arange(self._K * self._J)})
+        dic['X'] = xr.DataArray(self.x_obs, dims=['time', 'K'], name='X',
+                                coords = {'time': _time,'K': np.arange(1, 1 + self._K)})
+        dic['Y'] = xr.DataArray(self.y_obs, dims=['time', 'KJ'], name='Y',
+                                coords = {'time': _time, 'KJ': np.arange(1, 1 + self._K * self._J)})
+        dic['dx'] = xr.DataArray(self.x_obs, dims=['time', 'K'], name='dx',
+                                coords = {'time': _time,'K': np.arange(1, self._K + 1)})
+        dic['dy'] = xr.DataArray(self.y_obs, dims=['time', 'KJ'], name='dy',
+                                coords = {'time': _time, 'KJ': np.arange(1, 1 + self._K * self._J)})
 
         # Slow Variables above fast ones
         dic['X_repeat'] = xr.DataArray(np.repeat(self.x_obs, self._J, axis=1),
-                                   dims=['time', 'y'], name='X_repeat',
-                                    coords = {'time': _time,'y': np.arange(self._K * self._J)})# X's above the y's
+                                   dims=['time', 'KJ'], name='X_repeat',
+                                    coords = {'time': _time,'KJ': np.arange(1, 1 + self._K * self._J)})# X's above the y's
 
         return xr.Dataset(dic, attrs= self._parameters)
 
