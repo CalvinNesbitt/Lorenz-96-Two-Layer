@@ -37,7 +37,7 @@ class Integrator:
         # Model parameters
         self.K, self.J, self.h, self.Ff, self.Fs, self.b, self.c= K, J, h, Ff, Fs, b, c
         self.size = self.K + (self.J * self.K) # Number of variables
-        
+                
         self.time = 0 
 
         # Non-linear Variables
@@ -126,7 +126,7 @@ class TangentIntegrator:
     """Integrates the L96 ODEs and it's tangent dynamics simultaneously."""
     def __init__(self, K=36, J=10, h=1, Ff=6, Fs=10, b=10, c=10,
                  X_init=None, Y_init=None, dx_init=None, dy_init=None):
-
+        
         # Model parameters
         self.K, self.J, self.h, self.Ff, self.Fs, self.b, self.c= K, J, h, Ff, Fs, b, c
         self.size = self.K + (self.J * self.K) # Number of variables
@@ -188,7 +188,7 @@ class TangentIntegrator:
         IC = np.hstack((self.state, self.tangent_state))
         
         # Integration, uses RK45 with adaptive stepping. THIS IS THE HEART.
-        solver_return = scipy.integrate.solve_ivp(self._rhs_dt, (t, t + how_long), IC, dense_output = True)
+        solver_return = scipy.integrate.solve_ivp(self._rhs_dt, (t, t + how_long), IC)
         
         # Updating variables
         new_state = solver_return.y[:,-1]

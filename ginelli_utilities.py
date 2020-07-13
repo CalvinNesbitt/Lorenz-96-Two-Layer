@@ -57,7 +57,7 @@ class Forward:
         # Initialising orthogonal matrix
 
         if (oldQ == None):
-            eps = 0.0001
+            eps = 1.e-5
             self.oldQ = eps * np.identity(self.size)
             self.oldQ[0, 1] = eps * 1
 
@@ -83,7 +83,7 @@ class Forward:
 
             # Where we are in phase space before ginelli step
             phase_state = self.integrator.state
-            step = self.integrator.step_count
+            time = self.integrator.time
 
             # Stretching first column
             self.integrator.set_state(phase_state, self.oldQ.T[0]) # First column of Q is ic for TLE
@@ -97,7 +97,7 @@ class Forward:
 
                 # Reseting to where we were in phase space
                 self.integrator.set_state(phase_state, column)
-                self.integrator.step_count = step
+                self.integrator.time = time
 
                 self.integrator.integrate(self.tau)
                 self.P[:, i] = self.integrator.tangent_state
