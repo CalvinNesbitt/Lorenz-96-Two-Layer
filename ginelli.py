@@ -28,13 +28,13 @@ from ginelli_observers import *
 # -----------------------------------------
 
 # h experiment values
-values = np.linspace(1/16, 1, 5)
-h = values[int(sys.argv[1]) - 1]
+values = np.linspace(0.01, 0.5, 20)
+tau = values[int(sys.argv[1]) - 1]
 
 dump_size = 500 # How many observations before output
 
 # Time Parameter Choices
-tau = 0.1 # time between QR decompositions
+#tau = 0.1 # time between QR decompositions
 transient = 50
 ka = 500 # BLV convergence
 kb = 1000 # Number of observations

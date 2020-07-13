@@ -274,9 +274,9 @@ class TrajectoryObserver:
 
         # Making Observations
         self.x_obs.append(integrator.X.copy())
-        self.y_obs.append(integrator.Y.copy()/self.scale) # Integrator solves transformed equations
+        self.y_obs.append(integrator.Y.copy()) # Integrator solves transformed equations
         self.dx_obs.append(integrator.dx.copy())
-        self.dy_obs.append(integrator.dy.copy()/self.scale)
+        self.dy_obs.append(integrator.dy.copy())
 
     @property
     def observations(self):
