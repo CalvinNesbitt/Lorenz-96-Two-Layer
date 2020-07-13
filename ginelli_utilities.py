@@ -57,9 +57,8 @@ class Forward:
         # Initialising orthogonal matrix
 
         if (oldQ == None):
-            eps = 1.e-5
+            eps = 1.e-9
             self.oldQ = eps * np.identity(self.size)
-            self.oldQ[0, 1] = eps * 1
 
         else:
             self.oldQ = oldQ
@@ -100,7 +99,7 @@ class Forward:
                 self.integrator.time = time
 
                 self.integrator.integrate(self.tau)
-                self.P[:, i] = self.integrator.tangent_state
+                self.P[:, i + 1] = self.integrator.tangent_state
 
             # QR decomposition
             self.oldQ, self.R = posQR(self.P)
