@@ -31,18 +31,18 @@ from ginelli_observers import *
 values = np.linspace(0, 1, 5)
 h = values[int(sys.argv[1]) - 1]
 
-dump_size = 500 # How many observations before output
+dump_size = 250 # How many observations before output
 
 # Time Parameter Choices
-tau = 0.01 # time between QR decompositions
-transient = 50
-ka = 5000 # BLV convergence
-kb = 10000 # Number of observations
-kc = 5000 # CLV convergence
+#tau = 0.01 # time between QR decompositions
+transient = 25
+ka = 250 # BLV convergence
+kb = 1000 # Number of observations
+kc = 250 # CLV convergence
 
 # Integrator
-runner = l96.Integrator(h=h)
-tangent_runner = l96.TangentIntegrator(h=h)
+runner = l96.Integrator()
+tangent_runner = l96.TangentIntegrator()
 ginelli_runner = utilities.Forward(tangent_runner, tau)
 
 # Observables
@@ -79,7 +79,7 @@ timings.update({'transient': tm.time() - start})
 
 # BLV Convergence steps
 
-ginelli_runner.run(ka)
+ginelli_runner.run(ka, noprog=False)
 
 timings.update({'Step1': tm.time() - timings['transient'] - start})
 pickle.dump(timings, open("ginelli/timings.p", "wb" ))
@@ -94,16 +94,17 @@ remainder = kb%dump_size # Rest of observations
 
 for i in tqdm(range(blocks)):
 
-    utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], dump_size, 1)
+    utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], dump_size, 1, noprog=False)
     # Observation frequency has to be 1 if we're reversing CLVs
     Rlooker.dump('ginelli/step2/R')
     BLVlooker.dump('ginelli/step2/BLV')
     TrajectoryLooker.dump('ginelli/trajectory')
 
-utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], remainder, 1)
-Rlooker.dump('ginelli/step2/R')
-BLVlooker.dump('ginelli/step2/BLV')
-TrajectoryLooker.dump('ginelli/trajectory')
+if (remainder !=0):
+    utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], remainder, 1, noprog=False)
+    Rlooker.dump('ginelli/step2/R')
+    BLVlooker.dump('ginelli/step2/BLV')
+    TrajectoryLooker.dump('ginelli/trajectory')
 
 timings.update({'Step2': tm.time() - timings['Step1'] - start})
 pickle.dump(timings, open("ginelli/timings.p", "wb" ))
@@ -118,13 +119,16 @@ remainder = kc%dump_size
 
 for i in range(blocks):
 
-    utilities.make_observations(ginelli_runner, [Rlooker], dump_size, 1)
+    utilities.make_observations(ginelli_runner, [Rlooker], dump_size, 1, noprog=False)
     Rlooker.dump('ginelli/step3')
 
-utilities.make_observations(ginelli_runner, [Rlooker], remainder, 1)
-Rlooker.dump('ginelli/step3')
+if (remainder !=0):
+    utilities.make_observations(ginelli_runner, [Rlooker], remainder, 1, noprog=False)
+    Rlooker.dump('ginelli/step3')
 
-print('\nForward part all done :)')
+print('\n\n****************************************************************')
+print('Forward part all done :)')
+print('****************************************************************\n\n')
 
 timings.update({'Step3': tm.time() - timings['Step2'] - start})
 pickle.dump(timings, open("ginelli/timings.p", "wb" ))
