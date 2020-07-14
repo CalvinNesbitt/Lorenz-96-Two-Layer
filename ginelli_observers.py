@@ -7,9 +7,12 @@ Contents
 
 - BLVMatrixObserver, class for observing the R matrices.
 
-- LyapunovObserver, class for observing FTBLEs, FTCLEs, CLVs, BLVS.
+- LyapunovObserver, class for observing FTBLEs, FTCLEs, CLVs, BLVS. Used within Ginelli code, not specified at top of script like other observers.
 
-- TrajectoryObserver, class for observing trajectory.
+- L63TrajectoryObserver, class for observing trajectory of L63 System. Note this builds on a ginelli forward object rather than an
+integrator.
+
+- L96TrajectoryObserver, class for observing trajectory of L96 System.
 """
 
 # ----------------------------------------
@@ -235,12 +238,85 @@ class LyapunovObserver:
         self.wipe()
         self.dump_count -=1 # count down as we observe backwards
 
+
+# ------------------------------------------
+# L63TrajectoryObserver
+# ------------------------------------------
+
+class L63TrajectoryObserver():
+    """Observes the trajectory of L63 ODE integrator. Dumps to netcdf."""
+
+    def __init__(self, ginelli):
+        """param, integrator: integrator being observed."""
+
+        self.name = 'Trajectory'
+
+        # Knowledge from Ginelli object
+        self.integrator = ginelli.integrator # stepper we're associated with
+
+        # Need knowledge of the integrator
+        self._parameters = ginelli.integrator.parameter_dict
+
+        # Trajectory Observation logs
+        self.time_obs = [] # Times we've made observations
+        self.state_obs = []
+        self.dump_count = 0
+
+    def look(self, ginelli):
+        """Observes trajectory of L63"""
+
+        integrator = ginelli.integrator
+
+        # Note the time
+        self.time_obs.append(integrator.time)
+
+        # Making Observations
+        self.state_obs.append(integrator.state.copy())
+
+    def wipe(self):
+        self.time_obs = [] # Times we've made observations
+        self.state_obs = []
+
+    @property
+    def observations(self):
+        """cupboard: Directory where to write netcdf."""
+        if (len(self.state_obs) == 0):
+            print('I have no observations! :(')
+            return
+
+        _time = self.time_obs
+        x = xr.DataArray(np.array(self.state_obs)[:, 0], dims=['Time'], name = 'X', coords = {'Time': _time})
+        y = xr.DataArray(np.array(self.state_obs)[:, 1], dims=['Time'], name = 'Y', coords = {'Time': _time})
+        z = xr.DataArray(np.array(self.state_obs)[:, 2], dims=['Time'], name = 'Z', coords = {'Time': _time})
+        trajectory = xr.Dataset({'X': x, 'Y': y, 'Z': z})
+
+        return trajectory
+
+    def dump(self, cupboard, name=None):
+        """ Saves observations to netcdf and wipes.
+        cupboard: Directory where to write netcdf.
+        name: file name"""
+
+        if (len(self.time_obs) == 0):
+            print('I have no observations! :(')
+            return
+
+        if name == None:
+            name=self.name
+
+        save = cupboard + f'/{name}' + f'{self.dump_count + 1}.nc'
+        self.observations.to_netcdf(save)
+        print(f'Observations written to {save}. Erasing personal log.\n')
+        self.wipe()
+        self.dump_count +=1
+
+
 # ----------------------------------------
-# TrajectoryObserver
+# L96TrajectoryObserver
 # ----------------------------------------
 
 class TrajectoryObserver:
-    """Observes the Q Matrix in the forward Ginelli Steps."""
+    """Observes the L96 Trajectory. Builds on a Ginelli forward object."""
 
     def __init__(self, ginelli):
         """param, ginelli: Ginelli Forward Stepper being obseved."""

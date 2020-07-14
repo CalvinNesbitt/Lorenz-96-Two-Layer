@@ -17,7 +17,7 @@ import os
 import sys
 
 # Lorenz 96 integrator
-import l96adaptive as l96
+import l96_integrators as l96
 
 # Dependencies
 import ginelli_utilities as utilities
@@ -71,7 +71,7 @@ utilities.make_cupboard()
 # -----------------------------------------
 
 print('\nTransient beginning.\n')
-runner.integrate(transient) # runner does the transient integration, then we update tangent_runner state
+runner.integrate(transient)
 tangent_runner.set_state(runner.state, tangent_runner.tangent_state)
 print('\nTransient finished. Beginning BLV convergence steps.\n')
 
@@ -100,7 +100,7 @@ for i in tqdm(range(blocks)):
     BLVlooker.dump('ginelli/step2/BLV')
     TrajectoryLooker.dump('ginelli/trajectory')
 
-utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker], remainder, 1)
+utilities.make_observations(ginelli_runner, [Rlooker, BLVlooker, TrajectoryLooker], remainder, 1)
 Rlooker.dump('ginelli/step2/R')
 BLVlooker.dump('ginelli/step2/BLV')
 TrajectoryLooker.dump('ginelli/trajectory')
@@ -168,7 +168,7 @@ BLV_files.sort(reverse=True)
 
 parameters = ginelli_runner.parameter_dict.copy()
 parameters.update({'transient':transient,'ka':ka, 'kb':kb, 'kc':kc})
-LyapunovLooker = LyapunovObserver(parameters, utilities.max_digit(BLV_files))
+LyapunovLooker = LyapunovObserver(parameters, len(BLV_files))
 
 for [rfile, bfile] in zip(R_files, BLV_files): # Loop over files that were dumped
     R_history = xr.open_dataset('ginelli/step2/R/' + rfile)
