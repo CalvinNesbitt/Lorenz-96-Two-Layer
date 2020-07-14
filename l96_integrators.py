@@ -138,8 +138,8 @@ class TangentIntegrator:
         self.Y = np.random.rand(self.K * self.J) if Y_init is None else Y_init.copy()  # ALL the y's
 
         # TLE Variables
-        self.dx = np.array([i for i in np.random.rand(self.K)]) if dx_init is None else dx_init.copy()
-        self.dy = np.array([i for i in np.random.rand(self.K * self.J)]) if dy_init is None else dy_init.copy()
+        self.dx = np.array([i * 1.e-9 for i in np.random.rand(self.K)]) if dx_init is None else dx_init.copy()
+        self.dy = np.array([i * 1.e-9 for i in np.random.rand(self.K * self.J)]) if dy_init is None else dy_init.copy()
 
     def _rhs_X_dt(self, X, Y):
         """Compute the right hand side of the X-ODE."""
@@ -188,7 +188,7 @@ class TangentIntegrator:
         IC = np.hstack((self.state, self.tangent_state))
         
         # Integration, uses RK45 with adaptive stepping. THIS IS THE HEART.
-        solver_return = scipy.integrate.solve_ivp(self._rhs_dt, (t, t + how_long), IC, rtol=1.e-9, atol=1.e-9)
+        solver_return = scipy.integrate.solve_ivp(self._rhs_dt, (t, t + how_long), IC, dense_output=True)
         
         # Updating variables
         new_state = solver_return.y[:,-1]

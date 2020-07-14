@@ -58,7 +58,7 @@ class Forward:
 
         if (oldQ == None):
             eps = 1.e-9
-            self.oldQ = eps * np.identity(self.size)
+            self.oldQ = eps * np.random.rand(self.size, self.size)
 
         else:
             self.oldQ = oldQ
