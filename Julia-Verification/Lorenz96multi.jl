@@ -25,11 +25,11 @@ function (obj::Lorenz96multi{J,K})(dx, x, p, t) where {J,K}
     h = p[3]
     c = p[4]
     b = p[5]
-    
+
     # convective scales (y)
     dy = reshape(view(dx,(K+1):(K+J*K)),K,J)
     y = reshape(view(x,(K+1):(K+J*K)),K,J)
-    
+
     # large scales (x)
     # 3 large scale edge cases
     @inbounds dx[1] = (x[2] - x[K - 1]) * x[K]     - x[1] + Fˣ - (h*c/b)*sum(y[1,:])
@@ -40,7 +40,7 @@ function (obj::Lorenz96multi{J,K})(dx, x, p, t) where {J,K}
     for k in 3:(K - 1)
       @inbounds dx[k] = (x[k + 1] - x[k - 2]) * x[k - 1] - x[k] + Fˣ - (h*c/b)*sum(y[k,:])
     end
-    
+
     # convective edge cases
     # k = 1
     @inbounds dy[1,1] = c*b*(y[1,2] - y[K,J-1]) * y[K,J] - c*y[1,1] + (c/b)*Fʸ + (h*c/b)*x[1]
@@ -50,7 +50,7 @@ function (obj::Lorenz96multi{J,K})(dx, x, p, t) where {J,K}
     @inbounds dy[K,1] = c*b*(y[K,2] - y[K-1,J-1]) * y[K-1,J] - c*y[K,1] + (c/b)*Fʸ + (h*c/b)*x[K]
     @inbounds dy[K,2] = c*b*(y[K,3] - y[K-1,J]) * y[K,1] - c*y[K,2] + (c/b)*Fʸ + (h*c/b)*x[K]
     @inbounds dy[K,J] = c*b*(y[1,1] - y[K,J-2]) * y[K,J-1] - c*y[K,J] + (c/b)*Fʸ + (h*c/b)*x[K]
-    
+
     for k in 2:(K-1)
         @inbounds dy[k,1] = c*b*(y[k,2] - y[k-1,J-1]) * y[k-1,J] - c*y[k,1] + (c/b)*Fʸ + (h*c/b)*x[k]
         @inbounds dy[k,2] = c*b*(y[k,3] - y[k-1,J]) * y[k,1] - c*y[k,2] + (c/b)*Fʸ + (h*c/b)*x[k]
@@ -70,4 +70,4 @@ end
 lor96 = lorenz96multi(36,10,Fˣ=10.,Fʸ=10.,h=1.,c=10.,b=√(10*10))
 λλ = ChaosTools.lyapunovs(lor96, 100., dt = 0.01, Ttr = 50.)
 
-save("lyap.jld2","lambda",λλ)
+save("lyapTEST.jld2","lambda",λλ)

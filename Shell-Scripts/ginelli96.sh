@@ -1,7 +1,7 @@
-#PBS -l walltime=24:00:00
+#PBS -l walltime=72:00:00
 #PBS -l select=1:ncpus=8:mem=30gb
-#PBS -N tau-test
-#PBS -J 1-20
+#PBS -N h-bug-fixed
+#PBS -J 1-5
 
 # ---------------------------------------------------------------
 # !!!!!!!!!! CHANGE EXPERIMENT NAME BELOW!!!!!!!!!!!
@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------
 
 job_type='array' # 'single' or 'array'. Add 'PBS -J 1-N' for jobs
-experiment_name=tau-test
+experiment_name=h-bug-fix
 
 module load anaconda3/personal
 source activate personalpy3
