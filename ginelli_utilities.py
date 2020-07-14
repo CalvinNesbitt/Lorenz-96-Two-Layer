@@ -99,7 +99,7 @@ class Forward:
                 self.integrator.time = time
 
                 self.integrator.integrate(self.tau)
-                self.P[:, i + 1] = self.integrator.tangent_state
+                self.P[:, i + 1] = self.integrator.tangent_state # i + 1 index needed
 
             # QR decomposition
             self.oldQ, self.R = posQR(self.P)
