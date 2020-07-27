@@ -28,21 +28,21 @@ from ginelli_observers import *
 # -----------------------------------------
 
 # h experiment values
-values = np.linspace(0, 1, 5)
-h = values[int(sys.argv[1]) - 1]
+values = np.linspace(0, 15, 5)
+c = values[int(sys.argv[1]) - 1]
 
-dump_size = 250 # How many observations before output
+dump_size = 500 # How many observations before output
 
 # Time Parameter Choices
-#tau = 0.01 # time between QR decompositions
-transient = 25
-ka = 250 # BLV convergence
-kb = 1000 # Number of observations
-kc = 250 # CLV convergence
+tau = 0.01 # time between QR decompositions
+transient = 50
+ka = 2500 # BLV convergence
+kb = 10000 # Number of observations
+kc = 2500 # CLV convergence
 
 # Integrator
-runner = l96.Integrator()
-tangent_runner = l96.TangentIntegrator()
+runner = l96.Integrator(c=c)
+tangent_runner = l96.TangentIntegrator(c=c)
 ginelli_runner = utilities.Forward(tangent_runner, tau)
 
 # Observables
