@@ -27,8 +27,8 @@ from ginelli_observers import *
 # Setup & Parameter Choices
 # -----------------------------------------
 
-# h experiment values
-values = np.linspace(0, 15, 5)
+# Experiment values
+values = [32, 64, 128]
 c = values[int(sys.argv[1]) - 1]
 
 dump_size = 500 # How many observations before output
@@ -37,7 +37,7 @@ dump_size = 500 # How many observations before output
 tau = 0.01 # time between QR decompositions
 transient = 50
 ka = 2500 # BLV convergence
-kb = 10000 # Number of observations
+kb = 15000 # Number of observations
 kc = 2500 # CLV convergence
 
 # Integrator

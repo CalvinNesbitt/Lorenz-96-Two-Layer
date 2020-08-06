@@ -1,7 +1,7 @@
 #PBS -l walltime=72:00:00
 #PBS -l select=1:ncpus=8:mem=30gb
-#PBS -N c-effect
-#PBS -J 1-5
+#PBS -N c-exp-range2
+#PBS -J 1-3
 
 # ---------------------------------------------------------------
 # !!!!!!!!!! CHANGE EXPERIMENT NAME BELOW!!!!!!!!!!!
@@ -10,7 +10,7 @@
 # ---------------------------------------------------------------
 
 job_type='array' # 'single' or 'array'. Add 'PBS -J 1-N' for jobs
-experiment_name=c-effect
+experiment_name=c-exp-range2
 
 module load anaconda3/personal
 source activate personalpy3
@@ -31,7 +31,7 @@ then
     cd $job_directory/Ginelli-L96
     python ginelli.py $PBS_ARRAY_INDEX
     mkdir -p $output_directory/$PBS_ARRAY_INDEX
-    cp -r ginelli/step5 ginelli/timings.p $output_directory/$PBS_ARRAY_INDEX
+    cp -r ginelli/step5 ginelli/trajectory ginelli/timings.p $output_directory/$PBS_ARRAY_INDEX
 elif [ $job_type == 'single' ]
 then
     cd $PBS_O_WORKDIR/Ginelli-L96
@@ -41,7 +41,7 @@ then
     source deactivate
 
     # Copying Data We want over to notebook area
-    mv ginelli/step5 ginelli/timings.p $output_directory
+    mv ginelli/step5 ginelli/trajectory ginelli/timings.p $output_directory
 else
     echo 'Didnt specify job type correctly.'
 fi
